@@ -150,6 +150,6 @@ fun PostItem(post: MockPost) {
 @Composable
 @Preview
 fun HomeScreenPreview() {
-     homeScreen()
+    FeedScreen()
 }
 

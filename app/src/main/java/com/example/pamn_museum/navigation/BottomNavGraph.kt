@@ -4,10 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.pamn_museum.screens.ProfileScreen
-import com.example.pamn_museum.screens.SettingsScreen
-import com.example.pamn_museum.screens.homeScreen
-import com.example.pamn_museum.screens.qrScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.pamn_museum.screens.*
 
 @Composable
 fun BottomNavGraph(navController: NavHostController) {
@@ -25,9 +23,17 @@ fun BottomNavGraph(navController: NavHostController) {
             homeScreen()
         }
         composable(route = BottomBarScreen.Ticket.route) {
-        }
-        composable(route = BottomBarScreen.Settings.route) {
-            SettingsScreen()
+            Ticket()
         }
     }
+}
+
+@Composable
+fun LoginNav(){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "login_page", builder = {
+        composable("login_page", content = { LoginPage(navController = navController) })
+        composable("register_page", content = { RegisterPage(navController = navController) })
+        composable("reset_page", content = { ResetPage(navController = navController) })
+    })
 }
