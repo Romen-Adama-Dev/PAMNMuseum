@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "292107581442",
+    "project_id": "pamnmuseum",
+    "storage_bucket": "pamnmuseum.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292107581442:android:166d505a3fb47aaacbcf1b",
+        "android_client_info": {
+          "package_name": "com.example.bottomnavbardemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "292107581442-f5l1qfe5uvm6gfrg96cm1vd5b6ggff9l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxydjtoUfWQWp4yqJPUbcUqqAkzqcNb4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "292107581442-f5l1qfe5uvm6gfrg96cm1vd5b6ggff9l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

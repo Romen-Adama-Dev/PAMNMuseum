@@ -9,7 +9,7 @@ data class MockPost(
     val postId: String,
     val userImage: Int,
     val userName: String,
-    val image: Int,
+    val image: String,
     val description: String,
     val likes: Int,
     val comments: Int
