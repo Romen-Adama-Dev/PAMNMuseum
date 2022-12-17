@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -12,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.pamn_museum.navigation.BottomBarScreen
 import com.example.pamn_museum.navigation.BottomNavGraph
+
 
 @Composable
 fun MainScreen() {
@@ -23,6 +25,7 @@ fun MainScreen() {
     }
 }
 
+
 @Composable
 fun BottomBar(navController: NavHostController) {
     val screens = listOf(
@@ -30,7 +33,6 @@ fun BottomBar(navController: NavHostController) {
         BottomBarScreen.Scan,
         BottomBarScreen.Home,
         BottomBarScreen.Ticket,
-        BottomBarScreen.Settings,
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
