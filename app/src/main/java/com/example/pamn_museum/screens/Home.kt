@@ -1,5 +1,6 @@
 package com.example.pamn_museum.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,9 +23,43 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pamn_museum.R
 import com.example.pamn_museum.ui.theme.MockPost
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import coil.compose.AsyncImage
 import java.util.*
 import kotlin.random.Random
 
+val db = Firebase.firestore
+
+fun loadPosts(): MutableList<MockPost> {
+    var posts =  mutableListOf<MockPost>()
+
+    db.collection("posts")
+        .get()
+        .addOnSuccessListener { result ->
+            for (document in result){
+                var description = document.data.get("description") as String
+                var likes = (document.data.get("likes") as Long).toInt()
+                var comments = (document.data.get("comments") as Long).toInt()
+                var image = document.data.get("image") as String
+
+                //Datos de usuario Random
+                val uid = UUID.randomUUID().toString()
+                val userImage = R.drawable.logo
+                val username = "PAMN MUSEUM"
+                var post= MockPost(uid, userImage, username, image, description, likes, comments)
+                posts.add(post)
+
+                Log.i("firebase", "${post.description}  ${post.image} ${post.likes} ${post.comments}")
+
+
+            }
+
+        }.addOnFailureListener{
+            Log.e("firebase", "Error getting data", it)
+        }
+    return posts
+}
 
 @Composable
 fun homeScreen() {
@@ -34,10 +69,11 @@ fun homeScreen() {
             .background(Color.DarkGray),
         contentAlignment = Alignment.Center
     ) {
+        loadPosts()
         FeedScreen()
     }
 }
-
+/*
 //David
 val postList = listOf(
     R.drawable.monalisa, R.drawable.picasso, R.drawable.cuevaverdes, R.drawable.lanzarote,
@@ -67,6 +103,9 @@ val mockPosts = List(100) {
     val comments = Random.nextInt(100)
     MockPost(uid, userImage, username, image, description, likes, comments)
 }
+*/
+
+val mockPosts = loadPosts()
 
 @Composable
 fun FeedScreen() {
@@ -124,8 +163,8 @@ fun PostItem(post: MockPost) {
             )
             Text(text = post.userName, fontWeight = FontWeight.Bold)
         }
-        Image(
-            painter = painterResource(id = post.image),
+        AsyncImage(
+            model = post.image,
             contentDescription = null,
             modifier = Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillWidth

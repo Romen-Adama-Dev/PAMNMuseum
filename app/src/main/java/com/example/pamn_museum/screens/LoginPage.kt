@@ -1,6 +1,7 @@
 package com.example.pamn_museum.screens
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -33,13 +34,28 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.pamn_museum.MainScreen
 import com.example.pamn_museum.R
 import com.example.pamn_museum.components.Visibility
 import com.example.pamn_museum.components.VisibilityOff
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+
+data class LoginUser(
+    var email: String,
+    var password: String
+)
 
 @Composable
 fun LoginPage(navController: NavController) {
+    var loginUser = LoginUser("","")
+
+    if(FirebaseAuth.getInstance().currentUser != null){
+        homeScreen()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -78,10 +94,10 @@ fun LoginPage(navController: NavController) {
                         .fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                SimpleOutlinedTextFieldSample()
+                SimpleOutlinedTextFieldSample(loginUser)
 
                 Spacer(modifier = Modifier.padding(3.dp))
-                SimpleOutlinedPasswordTextField()
+                SimpleOutlinedPasswordTextField(loginUser)
 
                 val gradientColor = listOf(Color(0xFF9E0000), Color(0xFFFF0000))
                 val cornerRadius = 16.dp
@@ -90,7 +106,9 @@ fun LoginPage(navController: NavController) {
                     gradientColors = gradientColor,
                     cornerRadius = cornerRadius,
                     nameButton = "Login",
-                    roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp)
+                    roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp),
+                    loginUser = loginUser,
+
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
                 TextButton(onClick = {
@@ -127,18 +145,35 @@ private fun GradientButton(
     gradientColors: List<Color>,
     cornerRadius: Dp,
     nameButton: String,
-    roundedCornerShape: RoundedCornerShape
+    roundedCornerShape: RoundedCornerShape,
+    loginUser: LoginUser,
 ) {
+
     Button(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 32.dp, end = 32.dp),
         onClick = {
-            //David, aqui si ambos campos son correctos ejecutas MainScreen() y listo
+            Log.i("login", "${loginUser.email} ${loginUser.password}")
+
+            Firebase.auth.signInWithEmailAndPassword(loginUser.email, loginUser.password)
+                .addOnCompleteListener{task ->
+                    if (task.isSuccessful) {
+                        //ADAMA: Navegar a home
+                        Log.i("login", "login success")
+                    } else {
+                        Log.e("login", "login error",task.exception)
+                      //ADAMA: si el login falla por que la combinacion es incorrecta, mostrar mensaje de error
+                    }
+
+              }
+
+
         },
         contentPadding = PaddingValues(),
         colors = ButtonDefaults.buttonColors(),
-        shape = RoundedCornerShape(cornerRadius)
+        shape = RoundedCornerShape(cornerRadius),
+        //enabled = loginUser.email.length > 0 && loginUser.password.length > 0,
     ) {
         Box(
             modifier = Modifier
@@ -167,13 +202,14 @@ private fun GradientButton(
 //email id
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SimpleOutlinedTextFieldSample() {
+fun SimpleOutlinedTextFieldSample(loginUser: LoginUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by rememberSaveable { mutableStateOf("") }
 
     OutlinedTextField(
         value = text,
-        onValueChange = { text = it },
+        onValueChange = { text = it;
+            loginUser.email = it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Name or Email Address") },
@@ -188,7 +224,6 @@ fun SimpleOutlinedTextFieldSample() {
         keyboardActions = KeyboardActions(
             onDone = {
                 keyboardController?.hide()
-                // Codigo david Firebase
             }
         )
     )
@@ -197,13 +232,14 @@ fun SimpleOutlinedTextFieldSample() {
 //password
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SimpleOutlinedPasswordTextField() {
+fun SimpleOutlinedPasswordTextField(loginUser: LoginUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var password by rememberSaveable { mutableStateOf("") }
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
     OutlinedTextField(
         value = password,
-        onValueChange = { password = it },
+        onValueChange = { password = it;
+            loginUser.password = it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Enter Password") },

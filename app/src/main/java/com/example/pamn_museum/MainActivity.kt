@@ -11,8 +11,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PAMN_MuseumTheme {
-                //LoginNav()
-                MainScreen()
+                LoginNav()
+                //MainScreen()
             }
         }
     }

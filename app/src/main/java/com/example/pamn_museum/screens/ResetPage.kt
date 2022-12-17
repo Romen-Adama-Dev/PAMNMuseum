@@ -1,5 +1,6 @@
 package com.example.pamn_museum.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -31,9 +32,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pamn_museum.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+
+data class email(
+    var mail: String
+)
 
 @Composable
 fun ResetPage(navController: NavController) {
+    var email = email("")
 
     Box(
         modifier = Modifier
@@ -72,7 +80,7 @@ fun ResetPage(navController: NavController) {
                         .fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                ResetEmailID()
+                ResetEmailID(email)
                 Spacer(modifier = Modifier.padding(3.dp))
                 val gradientColor = listOf(Color(0xFF9E0000), Color(0xFFFF0000))
                 val cornerRadius = 16.dp
@@ -81,7 +89,8 @@ fun ResetPage(navController: NavController) {
                     gradientColors = gradientColor,
                     cornerRadius = cornerRadius,
                     nameButton = "Submit",
-                    roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp)
+                    roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp),
+                    email = email
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
                 TextButton(onClick = {
@@ -107,14 +116,18 @@ private fun GradientButtonReset(
     gradientColors: List<Color>,
     cornerRadius: Dp,
     nameButton: String,
-    roundedCornerShape: RoundedCornerShape
+    roundedCornerShape: RoundedCornerShape,
+    email: email
 ) {
     Button(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 32.dp, end = 32.dp),
         onClick = {
-            // Codigo david Firebase
+            Firebase.auth.sendPasswordResetEmail(email.mail)
+                .addOnCompleteListener {t ->
+                    Log.i("reset","correo mandado")
+                }
         },
         contentPadding = PaddingValues(),
         colors = ButtonDefaults.buttonColors(
@@ -144,13 +157,14 @@ private fun GradientButtonReset(
 //email id
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ResetEmailID() {
+fun ResetEmailID(email: email) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by rememberSaveable { mutableStateOf("") }
 
     OutlinedTextField(
         value = text,
-        onValueChange = { text = it },
+        onValueChange = { text = it;
+                        email.mail = it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Enter Registered Email",

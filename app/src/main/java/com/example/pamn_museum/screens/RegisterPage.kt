@@ -1,5 +1,7 @@
 package com.example.pamn_museum.screens
 
+import android.provider.ContactsContract.DisplayPhoto
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -35,9 +37,22 @@ import androidx.navigation.NavController
 import com.example.pamn_museum.R
 import com.example.pamn_museum.components.Visibility
 import com.example.pamn_museum.components.VisibilityOff
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+
+data class regUser(
+    var email: String,
+    var password: String,
+    var passwordCheck: String,
+    var name: String,
+    var phone: String
+)
 
 @Composable
 fun RegisterPage(navController: NavController) {
+    var regUser = regUser("","", "", "", "")
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,15 +90,15 @@ fun RegisterPage(navController: NavController) {
                         .fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                RegisterName()
+                RegisterName(regUser)
                 Spacer(modifier = Modifier.padding(3.dp))
-                RegisterPhone()
+                RegisterPhone(regUser)
                 Spacer(modifier = Modifier.padding(3.dp))
-                RegisterEmail()
+                RegisterEmail(regUser)
                 Spacer(modifier = Modifier.padding(3.dp))
-                RegisterPassword()
+                RegisterPassword(regUser)
                 Spacer(modifier = Modifier.padding(3.dp))
-                RegisterPasswordConfirm()
+                RegisterPasswordConfirm(regUser)
                 val gradientColor = listOf(Color(0xFF9E0000), Color(0xFFFF0000))
                 val cornerRadius = 16.dp
                 Spacer(modifier = Modifier.padding(10.dp))
@@ -92,7 +107,8 @@ fun RegisterPage(navController: NavController) {
                     gradientColors = gradientColor,
                     cornerRadius = cornerRadius,
                     nameButton = "Create An Account",
-                    roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp)
+                    roundedCornerShape = RoundedCornerShape(topStart = 30.dp,bottomEnd = 30.dp),
+                    regUser = regUser
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
                 TextButton(onClick = {
@@ -130,7 +146,8 @@ private fun GradientButton(
     gradientColors: List<Color>,
     cornerRadius: Dp,
     nameButton: String,
-    roundedCornerShape: RoundedCornerShape
+    roundedCornerShape: RoundedCornerShape,
+    regUser: regUser
 ) {
     Button(
         modifier = Modifier
@@ -138,11 +155,41 @@ private fun GradientButton(
             .padding(start = 32.dp, end = 32.dp),
         onClick = {
             // Codigo david Firebase
+                  if(regUser.password == regUser.passwordCheck){
+                      Firebase.auth.createUserWithEmailAndPassword(regUser.email, regUser.password)
+                          .addOnCompleteListener{task ->
+                              if (task.isSuccessful) {
+                                  //ADAMA: Navegar a home
+                                  Log.i("registro", "register success")
+
+                                  val user = hashMapOf(
+                                      "name" to regUser.name,
+                                      "email" to regUser.email,
+                                      "phone" to regUser.phone
+                                  )
+
+                                  Firebase.firestore.collection("users")
+                                      .add(user)
+                                      .addOnSuccessListener { documentReference ->
+                                          Log.d("registro", "Usuario con id: ${documentReference.id} y nombre ${regUser.name} añadido")
+                                      }
+
+                              } else {
+                                  Log.e("registro", "register error",task.exception)
+                                  //ADAMA: si el registro falla por que ya existe un usuario o el correo no es valido, mostrar mensaje de error
+                              }
+
+                          }
+                  }else{
+                      //ADAMA: mensaje que anuncia que las contraseñas deben ser iguales
+                  }
+
         },
         contentPadding = PaddingValues(),
         colors = ButtonDefaults.buttonColors(
         ),
-        shape = RoundedCornerShape(cornerRadius)
+        shape = RoundedCornerShape(cornerRadius),
+        //enabled = regUser.email.length > 0 && regUser.password.length > 0
     ) {
         Box(
             modifier = Modifier
@@ -167,12 +214,13 @@ private fun GradientButton(
 //name
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterName() {
+fun RegisterName(regUser: regUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by rememberSaveable { mutableStateOf("") }
     OutlinedTextField(
         value = text,
-        onValueChange = { text = it },
+        onValueChange = { text = it;
+                        regUser.name= it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Name") },
@@ -197,13 +245,14 @@ fun RegisterName() {
 //phone
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterPhone() {
+fun RegisterPhone(regUser: regUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by rememberSaveable { mutableStateOf("") }
 
     OutlinedTextField(
         value = text,
-        onValueChange = { text = it },
+        onValueChange = { text = it;
+                        regUser.phone = it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Phone",
@@ -230,13 +279,14 @@ fun RegisterPhone() {
 //email id
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterEmail() {
+fun RegisterEmail(regUser: regUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by rememberSaveable { mutableStateOf("") }
 
     OutlinedTextField(
         value = text,
-        onValueChange = { text = it },
+        onValueChange = { text = it;
+                        regUser.email= it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Email Address",
@@ -262,13 +312,14 @@ fun RegisterEmail() {
 //password
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterPassword() {
+fun RegisterPassword(regUser: regUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var password by rememberSaveable { mutableStateOf("") }
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
     OutlinedTextField(
         value = password,
-        onValueChange = { password = it },
+        onValueChange = { password = it;
+                       regUser.password = it },
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Enter Password",
@@ -303,13 +354,14 @@ fun RegisterPassword() {
 //password confirm
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterPasswordConfirm() {
+fun RegisterPasswordConfirm(regUser: regUser) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var password by rememberSaveable { mutableStateOf("") }
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
     OutlinedTextField(
         value = password,
-        onValueChange = { password = it },
+        onValueChange = { password = it;
+                        regUser.passwordCheck = it},
         shape = RoundedCornerShape(topEnd =12.dp, bottomStart =12.dp),
         label = {
             Text("Confirm Password",
