@@ -42,6 +42,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlin.system.exitProcess
 
 data class userData(
     var name:String,
@@ -80,7 +81,7 @@ fun ProfileScreen() {
                     modifier = Modifier.clickable {
                         FirebaseAuth.getInstance().signOut() ;
 
-                        navController.navigate("login_page")
+                        exitProcess(-1)
 
                     })
 
