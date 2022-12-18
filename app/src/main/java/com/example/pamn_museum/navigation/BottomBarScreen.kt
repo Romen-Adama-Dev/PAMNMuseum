@@ -48,4 +48,9 @@ sealed class LoginApp(
         routeLogin = "register",
         titleLogin = "Register",
     )
+
+    object Profile : LoginApp(
+        routeLogin = "profile",
+        titleLogin = "profile",
+    )
 }

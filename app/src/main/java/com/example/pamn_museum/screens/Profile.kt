@@ -1,5 +1,7 @@
 package com.example.pamn_museum.screens
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -24,43 +26,34 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.pamn_museum.R
 import com.example.pamn_museum.ui.theme.Grey200
 import com.example.pamn_museum.ui.theme.White500
+import com.google.android.gms.tasks.Tasks
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-data class user(
-    var name: String,
-    var phone: String,
-    var email: String
+data class userData(
+    var name:String,
+    var phone:String,
+    var email:String
 )
 
 @Composable
 fun ProfileScreen() {
-    Box(modifier = Modifier.background(Grey200).fillMaxHeight()){
-        /**var userData = user("","","")
-
-        FirebaseAuth.getInstance().currentUser?.email?.let {
-        Firebase.firestore
-        .collection("users")
-        .document(it).get()
-        .addOnSuccessListener { result ->
-        val data = result.data
-
-        userData.name = data?.get("name") as String
-        userData.phone = data?.get("phone") as String
-        userData.email = data?.get("email") as String
-
-        }
-        }
-         **/
-        //ADAMA: userData tiene toda la informacion de usuario necesaria para representarla (nombre, correo y telefono)
-        //ADAMA: para cerrar sesion de firebase es poner esta linea: FirebaseAuth.getInstance().signOut()
-
+    Box(modifier = Modifier
+        .background(Grey200)
+        .fillMaxHeight()){
         val notification = rememberSaveable { mutableStateOf("") }
         if (notification.value.isNotEmpty()) {
             Toast.makeText(LocalContext.current, notification.value, Toast.LENGTH_LONG).show()
@@ -83,10 +76,14 @@ fun ProfileScreen() {
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Cancel",
-                    modifier = Modifier.clickable { notification.value = "Cancelled" })
-                Text(text = "Save",
-                    modifier = Modifier.clickable { notification.value = "Profile updated" })
+                Text(text = "Sign out",
+                    modifier = Modifier.clickable {
+                        FirebaseAuth.getInstance().signOut() ;
+
+                        navController.navigate("login_page")
+
+                    })
+
             }
 
             ProfileImage()
@@ -101,59 +98,27 @@ fun ProfileScreen() {
                     .padding(start = 4.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Name", modifier = Modifier.width(100.dp), color = White500)
-                TextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Grey200,
-                        textColor = Color.White
-                    )
-                )
+                Text(text = "Bienvenido/a ${FirebaseAuth.getInstance().currentUser?.email}" ,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    color = White500)
+
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Username", modifier = Modifier.width(100.dp), color = White500)
-                TextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent,
-                        textColor = Color.White
-                    )
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Text(
-                    text = "Bio", modifier = Modifier
-                        .width(100.dp),
-                    color = White500
-                )
-                TextField(
-                    value = bio,
-                    onValueChange = { bio = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent,
-                        textColor = Color.White
-                    ),
-                    singleLine = false,
-                    modifier = Modifier.height(150.dp)
-                )
-            }
 
         }
+
+
+
+
+
     }
+}
+
+@Composable
+fun InfoProfile(){
+
 }
 
 @Composable

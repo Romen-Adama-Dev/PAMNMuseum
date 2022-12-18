@@ -165,15 +165,20 @@ private fun GradientButton(
                               if (task.isSuccessful) {
                                   Log.i("registro", "register success")
                                   val user = hashMapOf(
+
+                                      "uid" to task.result.user?.uid,
                                       "name" to regUser.name,
                                       "email" to regUser.email,
                                       "phone" to regUser.phone
                                   )
-                                  Firebase.firestore.collection("users")
-                                      .add(user)
-                                      .addOnSuccessListener { documentReference ->
-                                          Log.d("registro", "Usuario con id: ${documentReference.id} y nombre ${regUser.name} añadido")
-                                      }
+                                  task.result.user?.uid?.let {
+                                      Firebase.firestore.collection("users")
+                                          .document(it)
+                                          .set(user)
+                                          .addOnSuccessListener { documentReference ->
+                                              Log.d("registro", "Usuario con id: ${documentReference} y nombre ${regUser.name} añadido")
+                                          }
+                                  }
                               } else {
                                   Log.e("registro", "register error",task.exception)
                               }
