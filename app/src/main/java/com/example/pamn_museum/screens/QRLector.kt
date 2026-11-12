@@ -98,11 +98,11 @@ fun QRCodeScannerTheme(){
                 )
                 Text(
                     text = code,
-                    fontSize = 32.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(64.dp)
+                        .padding(160.dp)
                 )
             }
         }

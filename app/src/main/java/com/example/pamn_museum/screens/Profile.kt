@@ -1,6 +1,7 @@
 package com.example.pamn_museum.screens
 
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,10 +29,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.pamn_museum.R
+import com.example.pamn_museum.ui.theme.MockPost
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.util.*
 
+data class user(
+    var name: String,
+    var phone: String,
+    var email: String
+)
 
 @Composable
 fun ProfileScreen() {
+    var userData = user("","","")
+
+    FirebaseAuth.getInstance().currentUser?.email?.let {
+        Firebase.firestore
+            .collection("users")
+            .document(it).get()
+            .addOnSuccessListener { result ->
+                val data = result.data
+
+                userData.name = data?.get("name") as String
+                userData.phone = data?.get("phone") as String
+                userData.email = data?.get("email") as String
+
+            }
+    }
+
+    //ADAMA: userData tiene toda la informacion de usuario necesaria para representarla (nombre, correo y telefono)
+    //ADAMA: para cerrar sesion de firebase es poner esta linea: FirebaseAuth.getInstance().signOut()
+
+
 
     val notification = rememberSaveable { mutableStateOf("") }
     if (notification.value.isNotEmpty()) {
